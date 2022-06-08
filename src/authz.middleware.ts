@@ -3,7 +3,7 @@ import * as firebase from 'firebase-admin';
 import * as serviceAccount from '../service-account-key.json';
 import { Request, Response } from 'express';
 
-const firebase_key = {
+const ServiceAccount = {
   type: serviceAccount.type,
   projectId: serviceAccount.project_id,
   privateKeyId: serviceAccount.private_key_id,
@@ -13,16 +13,16 @@ const firebase_key = {
   authUri: serviceAccount.auth_uri,
   tokenUri: serviceAccount.token_uri,
   authProviderX509CertUrl: serviceAccount.auth_provider_x509_cert_url,
-  clientX509CertUrl: serviceAccount.client_x509_cert_url,
+  clientC509CertUrl: serviceAccount.client_x509_cert_url,
 };
 
 @Injectable()
 export class AuthzMiddleware implements NestMiddleware {
-  defaultApp: firebase.app.App;
+  private defaultApp: firebase.app.App;
 
   constructor() {
     this.defaultApp = firebase.initializeApp({
-      credential: firebase.credential.cert(firebase_key),
+      credential: firebase.credential.cert(ServiceAccount),
     });
   }
 
@@ -37,6 +37,7 @@ export class AuthzMiddleware implements NestMiddleware {
             email: decodedToken.email,
           };
           req['user'] = user;
+          next();
         })
         .catch((err) => {
           console.error(err);
